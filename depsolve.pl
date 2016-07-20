@@ -158,8 +158,10 @@ package_deps_resolve(_, [], []).
 package_deps_resolve(Depends, [Package|Packages], [[Package, Version, Variants, NotVariants]|ResolvedPackages]) :-
     % Find all package depends which care about this package.
     findall(PackageDepPackage, package_dep_package(PackageDepPackage, Package), PackageDepends),
+    % Filter them according to the package depends we're looking at now.
+    intersection(Depends, PackageDepends, ActiveDepends),
     % Get all of the required dependency information.
-    package_deps_requirements(PackageDepends, Versions, Variants, NotVariants),
+    package_deps_requirements(ActiveDepends, Versions, Variants, NotVariants),
     % Make sure variants are OK.
     flatten(Variants, AllVariants),
     flatten(NotVariants, AllNotVariants),
