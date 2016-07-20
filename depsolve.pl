@@ -186,6 +186,16 @@ package_variants_ok([Variant|Variants], NotVariants) :-
     \+memberchk(Variant, NotVariants),
     package_variants_ok(Variants, NotVariants).
 
+resolved_package([Package, Version, Variants, NotVariants]) :-
+    package(Package),
+    package_version(Package, Version, _, _),
+    findall(Variant, package_variant(Package, Variant), Variants),
+    findall(NotVariant, package_variant(Package, NotVariant), NotVariants).
+resolved_package_package([Package, _, _, _], Package) :- !.
+resolved_package_version([_, Version, _, _], Version) :- !.
+resolved_package_variants([_, _, Variants, _], Variants) :- !.
+resolved_package_nvariants([_, _, _, NotVariants], NotVariants) :- !.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Virtual package predicates.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -309,6 +319,28 @@ spec_nvariants(Depspec, NotVariants) :-
 spec_dependencies(Depspec, []) :-
     depspec_package(Depspec, _),
     % Depspecs never have dependencies.
+    !.
+
+% Resolved package -> spec handling.
+spec_package(ResolvedPackage, Package) :-
+    resolved_package(ResolvedPackage),
+    !,
+    resolved_package_package(ResolvedPackage, Package).
+spec_version(ResolvedPackage, Version) :-
+    resolved_version(ResolvedPackage),
+    !,
+    resolved_package_version(ResolvedPackage, Version).
+spec_variants(ResolvedPackage, Variants) :-
+    resolved_variants(ResolvedPackage),
+    !,
+    resolved_package_variants(ResolvedPackage, Variants).
+spec_nvariants(ResolvedPackage, NotVariants) :-
+    resolved_nvariants(ResolvedPackage),
+    !,
+    resolved_package_nvariants(ResolvedPackage, NotVariants).
+spec_dependencies(ResolvedPackage, []) :-
+    resolved_package(ResolvedPackage),
+    % Resolved packages never have dependencies.
     !.
 
 % Check if a variant is enabled on a spec.
