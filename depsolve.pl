@@ -115,9 +115,9 @@ package_deps_no_pure_builddep([], []).
 package_deps_no_pure_builddep([PackageDepend|PackageDepends], NoBuildDepends) :-
     package_dep_deptypes(PackageDepend, [build]),
     !,
-    package_deps_pure_builddep(PackageDepends, NoBuildDepends).
+    package_deps_no_pure_builddep(PackageDepends, NoBuildDepends).
 package_deps_no_pure_builddep([PackageDepend|PackageDepends], [PackageDepend|NoBuildDepends]) :-
-    package_deps_pure_builddep(PackageDepends, NoBuildDepends).
+    package_deps_no_pure_builddep(PackageDepends, NoBuildDepends).
 
 package_deps_packages([], []).
 package_deps_packages([PackageDepend|PackageDepends], [Package|Packages]) :-
