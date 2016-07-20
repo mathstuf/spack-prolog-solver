@@ -148,7 +148,7 @@ packages_check_virtuals([Package|Packages], Virtuals) :-
     virtual_package_package(_, Package),
     !,
     setof(VirtualPackage, virtual_package_package(VirtualPackage, Package), VirtualPackages),
-    intersection(VirtualPackages, Virtuals, []).
+    intersection(VirtualPackages, Virtuals, []),
     !,
     packages_check_virtuals(Packages, [VirtualPackage|Virtuals]).
 packages_check_virtuals([Package|Packages], Virtuals) :-
