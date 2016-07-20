@@ -60,6 +60,10 @@ version_match([Version|Versions], [VersionRequest|VersionRequests]) :-
 
 % A single range is fine.
 versions_resolve_ranges([[VersionLow, VersionHigh]], [VersionLow, VersionHigh]).
+% Ignore unbounded ranges.
+versions_resolve_ranges([[ver_any, ver_any]|VersionRanges], [ReqVersionLow, ReqVersionHigh]) :-
+    versions_resolve_ranges(VersionRanges, [ReqVersionLow, ReqVersionHigh]),
+    !.
 versions_resolve_ranges([[VersionLow, VersionHigh]|VersionRanges], [ReqVersionLow, ReqVersionHigh]) :-
     % We must have a lower bound higher than all requested lower bounds.
     version_compare(VersionLow, ReqVersionLow),
