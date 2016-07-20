@@ -151,7 +151,7 @@ packages_check_virtuals([Package|Packages], Virtuals) :-
     intersection(VirtualPackages, Virtuals, []),
     !,
     packages_check_virtuals(Packages, [VirtualPackage|Virtuals]).
-packages_check_virtuals([Package|Packages], Virtuals) :-
+packages_check_virtuals([_|Packages], Virtuals) :-
     packages_check_virtuals(Packages, Virtuals).
 
 package_deps_resolve(_, [], []).
