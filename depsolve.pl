@@ -99,8 +99,21 @@ package_depends(Package, PackageDepends) :-
     findall(PackageDepend, package_depends_on(Package, PackageDepend), PackageDepends).
 
 % Find out if a package is a pure builddep.
-package_dep_pure_builddep(PackageDepend) :-
-    package_dep_deptypes(PackageDepend, [build]).
+package_deps_pure_builddep([], []).
+package_deps_pure_builddep([PackageDepend|PackageDepends], [PackageDepend|BuildDepends]) :-
+    package_dep_deptypes(PackageDepend, [build]),
+    !,
+    package_deps_pure_builddep(PackageDepends, BuildDepends).
+package_deps_pure_builddep([_|PackageDepends], BuildDepends) :-
+    package_deps_pure_builddep(PackageDepends, BuildDepends).
+
+package_deps_no_pure_builddep([], []).
+package_deps_no_pure_builddep([PackageDepend|PackageDepends], NoBuildDepends) :-
+    package_dep_deptypes(PackageDepend, [build]),
+    !,
+    package_deps_pure_builddep(PackageDepends, NoBuildDepends).
+package_deps_no_pure_builddep([PackageDepend|PackageDepends], [PackageDepend|NoBuildDepends]) :-
+    package_deps_pure_builddep(PackageDepends, NoBuildDepends).
 
 package_deps_packages([], []).
 package_deps_packages([PackageDepend|PackageDepends], [Package|Packages]) :-
@@ -330,20 +343,20 @@ spec_depends(Spec, Depends) :-
     spec_is_valid(Spec, Package),
     % Get all of its dependencies.
     package_depends(Package, Depends).
-spec_depends_pure_builddep(Spec, Depends) :-
+spec_depends_pure_builddep(Spec, BuildDepends) :-
     % Find a package for which the spec works.
     spec_is_valid(Spec, Package),
     % Get all of its dependencies.
     package_depends(Package, Depends),
     % Get only pure-builddeps.
-    package_dep_pure_builddep(Depends).
-spec_depends_no_pure_builddep(Spec, Depends) :-
+    package_deps_pure_builddep(Depends, BuildDepends).
+spec_depends_no_pure_builddep(Spec, NoBuildDepends) :-
     % Find a package for which the spec works.
     spec_is_valid(Spec, Package),
     % Get all of its dependencies.
     package_depends(Package, Depends),
     % Ignore pure-builddeps.
-    \+package_dep_pure_builddep(Depends).
+    package_deps_no_pure_builddep(Depends, NoBuildDepends).
 
 % Find dependencies that matter for a spec.
 spec_active_dependencies(_, [], []).
