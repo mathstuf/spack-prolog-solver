@@ -159,7 +159,7 @@ packages_check_virtuals([_|Packages], Virtuals) :-
     packages_check_virtuals(Packages, Virtuals).
 
 package_deps_resolve(_, [], []).
-package_deps_resolve(Depends, [Package|Packages], [[Package, Version, Variants, NotVariants]|ResolvedPackages]) :-
+package_deps_resolve(Depends, [Package|Packages], [[Package, Version, AllVariants, AllNotVariants]|ResolvedPackages]) :-
     % Find all package depends which care about this package.
     findall(PackageDepPackage, package_dep_package(PackageDepPackage, Package), PackageDepends),
     % Filter them according to the package depends we're looking at now.
