@@ -533,10 +533,20 @@ spec_deptree_against_exist(Context, Spec, ResolvedPackages) :-
     % Unify all packages against the requiring specs.
     package_deps_resolve_against_exist(Context, AllDepends, PackageSet, ResolvedPackages).
 
+spec_resolve_each([], []).
+spec_resolve_each([Package|Packages], [PackageTree|PackageTrees]) :-
+    spec_deptree_against_exist(Packages, Package, PackageTree), !,
+    spec_resolve_each(Packages, PackageTrees).
+
+resolved_spec_sort(<, _, []).
+resolved_spec_sort(<, Before, [Next|Rest]) :-
+    \+memberchk(Next, Before),
+    resolved_spec_sort(Before, Rest).
+
 % Get the installation tree for a set of packages.
-%spec_install_order(ResolvedPackages, InstallOrder) :-
-%    spec_deptree(Spec, ResolvedPackages),
-%    !.
+spec_install_order(ResolvedPackages, InstallOrder) :-
+    spec_resolve_each(ResolvedPackages, ResolvedPackageTrees),
+    predsort(resolved_spec_sort, ResolvedPackageTrees, InstallOrder).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
