@@ -177,6 +177,60 @@ package_meets_requirements(Depends, Package, Version, Variants, NotVariants) :-
                              version_between(VersionLow, VersionHigh, PackageVersion)), PackageVersions),
     memberchk(Version, PackageVersions).
 
+find_context_packages([], _, []).
+find_context_packages([ContextPackage|Context], Package, [ContextPackage|ContextPackages]) :-
+    spec_package(ContextPackage, Package), !,
+    find_context_packages(Context, Package, ContextPackages).
+find_context_packages([_|Context], Package, ContextPackages) :-
+    find_context_packages(Context, Package, ContextPackages).
+
+find_matching_package(Context, Depends, Package, InstalledPackage) :-
+    % Find all candidate installed packages.
+    find_context_packages(Context, Package, MatchingPackages), !,
+    % Find all viable candidate packages.
+    findall(CandidatePackage,
+            (% Make sure it meets the requirements.
+             memberchk(CandidatePackage, MatchingPackages),
+             % Get the version of the package.
+             spec_version(CandidatePackage, CandidateVersion),
+             % Get the underlying package of the installed package.
+             spec_package(CandidatePackage, CandidatePackagePackage),
+             % Make sure it meets the requirements.
+             package_meets_requirements(Depends, CandidatePackagePackage,
+                                        CandidateVersion,
+                                        ReqVariants, ReqNotVariants),
+             % Get the variants of the package.
+             spec_variants(CandidatePackage, CandidateVariants),
+             spec_nvariants(CandidatePackage, CandidateNotVariants),
+             % Make sure the given variants don't conflict with the requirements.
+             package_variants_ok(ReqVariants, CandidateNotVariants),
+             package_variants_ok(CandidateVariants, ReqNotVariants),
+             % Make sure the variants are a subset
+             subset(CandidateVariants, ReqVariants),
+             subset(CandidateNotVariants, ReqNotVariants)),
+            ViablePackages),
+    memberchk(InstalledPackage, ViablePackages).
+
+package_deps_resolve_against_exist(_, _, [], []).
+package_deps_resolve_against_exist(Context, Depends, Packages, AllResolvedPackages) :-
+    package_deps_resolve_against_exist(Context, Depends, Packages, ExistingPackages, PackagesToInstall),
+    package_deps_resolve(Depends, PackagesToInstall, ResolvedInstallPackages),
+    append(ExistingPackages, ResolvedInstallPackages, AllResolvedPackages).
+
+% No more context; pass along remaining information.
+package_deps_resolve_against_exist([], _, Packages, [], Packages).
+% No more packages to install; nothing more to do.
+package_deps_resolve_against_exist(_, _, [], [], []).
+% Resolve the next dependency against the installed packages.
+package_deps_resolve_against_exist(Context, Depends, [Package|Packages], [InstalledPackage|ExistingPackages], PackagesToInstall) :-
+    % See if Depend matches an already installed package.
+    find_matching_package(Context, Depends, Package, InstalledPackage),
+    % Resolve the remaining packages.
+    package_deps_resolve_against_exist(Context, Depends, Packages, ExistingPackages, PackagesToInstall).
+% If the above fails, we get here; just go onto the next dependencies.
+package_deps_resolve_against_exist(Context, Depends, [Package|Packages], ExistingPackages, [Package|PackagesToInstall]) :-
+    package_deps_resolve_against_exist(Context, Depends, Packages, ExistingPackages, PackagesToInstall).
+
 package_deps_resolve(_, [], []).
 package_deps_resolve(Depends, [Package|Packages], [[Package, Version, Variants, NotVariants]|ResolvedPackages]) :-
     % Find a package meeting the requirements.
@@ -444,6 +498,13 @@ spec_deptree(Spec, ResolvedPackages) :-
     spec_deptree_packages(Spec, AllDepends, PackageSet),
     % Unify all packages against the requiring specs.
     package_deps_resolve(AllDepends, PackageSet, ResolvedPackages).
+
+% Get the deptree for a spec.
+spec_deptree_against_exist(Context, Spec, ResolvedPackages) :-
+    % Find dependent packages.
+    spec_deptree_packages(Spec, AllDepends, PackageSet),
+    % Unify all packages against the requiring specs.
+    package_deps_resolve_against_exist(Context, AllDepends, PackageSet, ResolvedPackages).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
