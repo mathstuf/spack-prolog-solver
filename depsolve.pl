@@ -158,6 +158,17 @@ packages_check_virtuals([Package|Packages], Virtuals) :-
 packages_check_virtuals([_|Packages], Virtuals) :-
     packages_check_virtuals(Packages, Virtuals).
 
+%package_deps_resolve(Depends, [VirtualPackage|Packages], OldPackages, [[Package, Version, Variants, NotVariants]|ResolvedPackages]) :-
+%    virtual_package(VirtualPackage),
+%    findall(ImplPackage, virtual_package_package(VirtualPackage, ImplPackage), ImplPackages),
+%    append(Packages, OldPackages, OtherPackages),
+%    intersection(OtherPackages, ImplPackages, [ActiveImpl])
+%    !,
+%    findall(PackageDepPackage, (package_dep_package(PackageDepPackage, Package);
+%                                package_dep_package(PackageDepPackage, VirtualPackage)),
+%            PackageDepends),
+%    true.
+
 package_meets_requirements(Depends, Package, Version, Variants, NotVariants) :-
     % Find all package depends which care about this package.
     findall(PackageDepPackage, package_dep_package(PackageDepPackage, Package), PackageDepends),
@@ -243,6 +254,22 @@ package_variants_ok(_, []).
 package_variants_ok([Variant|Variants], NotVariants) :-
     \+memberchk(Variant, NotVariants),
     package_variants_ok(Variants, NotVariants).
+
+% resolved_package_install(ResolvedPackage, AllPackages, InstalledPackage) :-
+%     resolved_package_package(ResolvedPackage, Package),
+%     package_depends(Package, Depends),
+%     spec_active_dependencies(ResolvedPackage, Depends, ActiveDepends).
+
+% resolved_package_find_trees([], _, []).
+% resolved_package_find_trees([Package|Packages], AllPackages, [InstallTree|InstallTrees]) :-
+%     spec_deptree(Package, InstallTree),
+%     resolved_package_find_trees(Packages, AllPackages, InstallTrees).
+
+% resolved_packages_install([], _, []).
+% resolved_packages_install([Package|Packages], AllPackages, [InstalledPackage|InstalledPackages]) :-
+%     resolved_package_find_trees(Packages, AllPackages),
+%     resolved_package_install(Package, AllPackages, InstalledPackage),
+%     resolved_packages_install(Packages, AllPackages, InstalledPackages).
 
 resolved_package([Package, Version, Variants, NotVariants]) :-
     package(Package),
@@ -505,6 +532,11 @@ spec_deptree_against_exist(Context, Spec, ResolvedPackages) :-
     spec_deptree_packages(Spec, AllDepends, PackageSet),
     % Unify all packages against the requiring specs.
     package_deps_resolve_against_exist(Context, AllDepends, PackageSet, ResolvedPackages).
+
+% Get the installation tree for a set of packages.
+%spec_install_order(ResolvedPackages, InstallOrder) :-
+%    spec_deptree(Spec, ResolvedPackages),
+%    !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
