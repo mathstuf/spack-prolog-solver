@@ -158,26 +158,30 @@ packages_check_virtuals([Package|Packages], Virtuals) :-
 packages_check_virtuals([_|Packages], Virtuals) :-
     packages_check_virtuals(Packages, Virtuals).
 
-package_deps_resolve(_, [], []).
-package_deps_resolve(Depends, [Package|Packages], [[Package, Version, AllVariants, AllNotVariants]|ResolvedPackages]) :-
+package_meets_requirements(Depends, Package, Version, Variants, NotVariants) :-
     % Find all package depends which care about this package.
     findall(PackageDepPackage, package_dep_package(PackageDepPackage, Package), PackageDepends),
     % Filter them according to the package depends we're looking at now.
     intersection(Depends, PackageDepends, ActiveDepends),
     % Get all of the required dependency information.
-    package_deps_requirements(ActiveDepends, Versions, Variants, NotVariants),
+    package_deps_requirements(ActiveDepends, Versions, AllVariants, AllNotVariants),
     % Make sure variants are OK.
-    flatten(Variants, AllVariants),
-    flatten(NotVariants, AllNotVariants),
-    package_variants_ok(AllVariants, AllNotVariants),
+    flatten(AllVariants, Variants),
+    flatten(AllNotVariants, NotVariants),
+    package_variants_ok(Variants, NotVariants),
     % Cut here because if variants don't work, nothing will.
     !,
     % Find a suitable version for the package.
     versions_resolve_ranges(Versions, [VersionLow, VersionHigh]),
     findall(PackageVersion, (package_version(Package, PackageVersion, _, _),
                              version_between(VersionLow, VersionHigh, PackageVersion)), PackageVersions),
-    memberchk(Version, PackageVersions),
-    % Resolve the reamining packages.
+    memberchk(Version, PackageVersions).
+
+package_deps_resolve(_, [], []).
+package_deps_resolve(Depends, [Package|Packages], [[Package, Version, Variants, NotVariants]|ResolvedPackages]) :-
+    % Find a package meeting the requirements.
+    package_meets_requirements(Depends, Package, Version, Variants, NotVariants),
+    % Resolve the remaining packages.
     package_deps_resolve(Depends, Packages, ResolvedPackages).
 
 package_variants_ok([], _).
