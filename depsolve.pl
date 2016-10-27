@@ -422,7 +422,7 @@ specs_depends([Spec|Specs], AllDepends) :-
     append(CurDepends, RecursiveDepends, AllDepends).
 
 % Get the deptree for a spec.
-spec_deptree(Spec, ResolvedPackages) :-
+spec_deptree_packages(Spec, AllDepends, PackageSet) :-
     % Find all active dependencies of the top-level package. The top-level
     % spec is already fully specified, so don't backtrack over it.
     spec_depends(Spec, AllSpecDepends),
@@ -436,7 +436,12 @@ spec_deptree(Spec, ResolvedPackages) :-
     % Uniquify packages.
     list_to_set(Packages, PackageSet),
     % Ensure that no two packages provide the same virtual.
-    packages_check_virtuals(PackageSet, _),
+    packages_check_virtuals(PackageSet, _).
+
+% Get the deptree for a spec.
+spec_deptree(Spec, ResolvedPackages) :-
+    % Find dependent packages.
+    spec_deptree_packages(Spec, AllDepends, PackageSet),
     % Unify all packages against the requiring specs.
     package_deps_resolve(AllDepends, PackageSet, ResolvedPackages).
 
