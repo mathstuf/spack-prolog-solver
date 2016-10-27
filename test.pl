@@ -16,7 +16,7 @@ test_deptree(Name, Spec, Expected) :-
 
 :- initialization(main).
 
-main :-
+test :-
     test_deptree("cmake~qt",
         cmake_0,
         [
@@ -29,5 +29,8 @@ main :-
             [curl, [7, 49, 1], [], []],
             [qt, [4, 8, 6], [], []],
             [zlib, [1, 2, 8], [], []]
-        ]),
+        ]).
+
+main :-
+    test,
     halt.
