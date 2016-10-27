@@ -2,11 +2,14 @@
 
 :- include("depsolve").
 
+expect(Computed, Expected) :-
+    subtract(Computed, Expected, []),
+    subtract(Expected, Computed, []).
+
 test_deptree(Spec, Expected) :-
     spec_deptree(Spec, Computed),
     !,
-    subtract(Computed, Expected, []),
-    subtract(Expected, Computed, []).
+    expect(Computed, Expected).
 
 :- initialization(main).
 
