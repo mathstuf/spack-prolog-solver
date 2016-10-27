@@ -118,7 +118,7 @@ spec_package(build2, dtbuild2).
 spec_package(run2, dtrun2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% CMake example
+% Package declarations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % The zlib package.
@@ -128,6 +128,8 @@ package_version(zlib, [1, 2, 8], "http://curl.haxx.se", "abcdef").
 % The curl package.
 package(curl).
 package_version(curl, [7, 49, 1], "http://curl.haxx.se", "abcdef").
+package_version(curl, [7, 49, 2], "http://curl.haxx.se", "abcdef").
+package_version(curl, [7, 50, 0], "http://curl.haxx.se", "abcdef").
 package_version_default(curl, [7, 49, 1]) :- !.
 
 % curl depends on zlib.
@@ -137,6 +139,8 @@ package_depends_on(curl, curl_zlib_0).
 
 % The qt package.
 package(qt).
+package_version(qt, [4, 8, 6], "http://curl.haxx.se", "abcdef").
+package_version_default(qt, [4, 8, 6]) :- !.
 
 % The cmake package.
 package(cmake).
@@ -156,6 +160,10 @@ package_dep_when(Spec, cmake_qt_0) :-
 % CMake dependencies.
 package_depends_on(cmake, cmake_curl_0).
 package_depends_on(cmake, cmake_qt_0).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Spec declarations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % A test spec.
 spec_package(cmake_0, cmake) :- !.
