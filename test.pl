@@ -4,7 +4,9 @@
 
 expect(Computed, Expected) :-
     subtract(Computed, Expected, []),
-    subtract(Expected, Computed, []).
+    subtract(Expected, Computed, []);
+    print_message(error, Computed),
+    print_message(error, Expected).
 
 test_deptree(Spec, Expected) :-
     spec_deptree(Spec, Computed),
