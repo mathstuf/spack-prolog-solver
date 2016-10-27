@@ -327,15 +327,15 @@ spec_package(ResolvedPackage, Package) :-
     !,
     resolved_package_package(ResolvedPackage, Package).
 spec_version(ResolvedPackage, Version) :-
-    resolved_version(ResolvedPackage),
+    resolved_package(ResolvedPackage),
     !,
     resolved_package_version(ResolvedPackage, Version).
 spec_variants(ResolvedPackage, Variants) :-
-    resolved_variants(ResolvedPackage),
+    resolved_package(ResolvedPackage),
     !,
     resolved_package_variants(ResolvedPackage, Variants).
 spec_nvariants(ResolvedPackage, NotVariants) :-
-    resolved_nvariants(ResolvedPackage),
+    resolved_package(ResolvedPackage),
     !,
     resolved_package_nvariants(ResolvedPackage, NotVariants).
 spec_dependencies(ResolvedPackage, []) :-
